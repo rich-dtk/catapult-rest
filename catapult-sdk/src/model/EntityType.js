@@ -55,7 +55,10 @@ const EntityType = {
 	secretLock: 0x424C,
 
 	/** Secret proof transaction. */
-	secretProof: 0x434C
+	secretProof: 0x434C,
+
+	/** Account properties transaction. */
+	accountProperties: 0x0000
 };
 
 module.exports = EntityType;
