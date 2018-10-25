@@ -35,7 +35,8 @@ describe('entity type enumeration', () => {
 			aggregateBonded: 0x4241,
 			hashLock: 0x414C,
 			secretLock: 0x424C,
-			secretProof: 0x434C
+			secretProof: 0x434C,
+			accountProperties: 0xFFFF
 		});
 	});
 

@@ -26,7 +26,7 @@ const sizes = require('../modelBinary/sizes');
 const constants = { sizes };
 
 const PropertyTypeEnum = Object.freeze({
-    adress: 1,
+    address: 1,
 	mosaicId: 2,
 	transactionType: 4,
 });
@@ -41,18 +41,18 @@ const accountPropertiesPlugin = {
 	registerSchema: builder => {
 		builder.addTransactionSupport(EntityType.accountProperties, {
 			propertyType: ModelType.uint64,
-			modifications: { type: ModelType.array, schemaName: 'modificationType'}
+			modifications: { type: ModelType.array, schemaName: 'accountProperties.modificationType'}
 		});
-		builder.addSchema('modificationType', {
-			modificationType: Modeltype.uint64,
+		builder.addSchema('accountProperties.modificationType', {
+			modificationType: ModelType.uint64,
 			value: ModelType.binary
 		});
-		builder.addSchema('accountProperties', {
+		builder.addSchema('accountProperties.accountProperties', {
 			address: ModelType.binary,
-			properties: { type: ModelType.array, schemaName: 'accountProperty' }
+			properties: { type: ModelType.array, schemaName: 'accountProperties.accountProperty' }
 		});
-		builder.addSchema('accountProperty', {
-			propertType: ModelType.uint64,
+		builder.addSchema('accountProperties.accountProperty', {
+			propertyType: ModelType.uint64,
 			values: ModelType.binary
 		});
 	},
@@ -60,24 +60,27 @@ const accountPropertiesPlugin = {
 	registerCodecs: codecBuilder => {
 		codecBuilder.addTransactionSupport(EntityType.accountProperties, {
 			deserialize: parser => {
-
 				const transaction = {};
 				transaction.propertyType = parser.uint8();
 
-				transaction.modifications = {};
+				transaction.modifications = [];
 				const propertiesCount = parser.uint8();
 
-				for (let i = 0; i <= propertiesCount: i++) {
+				for (let i = 0; i < propertiesCount; i++) {
 					const propertyType = propertyTypeListToPropertyType(transaction.propertyType);
+                    const modification = {};
+                    modification.modificationType = parser.uint8();
 					if (propertyType === PropertyTypeEnum.address) {
-						transaction.modifications.push(parser.buffer(constants.sizes.addressDecoded));
+						modification.value = parser.buffer(constants.sizes.addressDecoded);
 
 					} else if (propertyType === PropertyTypeEnum.mosaicId) {
-						transaction.modifications.push(parser.uint16());
+						modification.value = parser.uint16();
 
 					} else if (propertyType === PropertyTypeEnum.transactionType) {
-						transaction.modifications.push(parser.uint16());
+						modification.value = parser.uint16();
 					}
+
+                    transaction.modifications.push(modification);
 				}
 				return transaction;
 			},
@@ -87,16 +90,18 @@ const accountPropertiesPlugin = {
 				serializer.writeUint8(transaction.propertyType);
 				serializer.writeUint8(transaction.modifications.length);
 
-				for (let i = 0; i <= transaction.modifications.length; i++) {
+				for (let i = 0; i < transaction.modifications.length; i++) {
 					const propertyType = propertyTypeListToPropertyType(transaction.propertyType);
+                    serializer.writeUint8(transaction.modifications[i].modificationType);
+
 					if (propertyType === PropertyTypeEnum.address) {
-						serializer.writeBuffer(transaction.modifications[i]);
+						serializer.writeBuffer(transaction.modifications[i].value);
 
 					} else if (propertyType === PropertyTypeEnum.mosaicId) {
-						serializer.writeUint16(transaction.modifications[i]);
+						serializer.writeUint16(transaction.modifications[i].value);
 
 					} else if (propertyType === PropertyTypeEnum.transactionType) {
-						serializer.writeUint16(transaction.modifications[i]);
+						serializer.writeUint16(transaction.modifications[i].value);
 					}
 				}
 			}
@@ -104,4 +109,8 @@ const accountPropertiesPlugin = {
 	}
 };
 
-module.exports = accountPropertiesPlugin;
+module.exports = {
+	accountPropertiesPlugin,
+	propertyTypeListToPropertyType,
+	PropertyTypeEnum
+}
