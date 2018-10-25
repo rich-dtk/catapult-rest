@@ -25,6 +25,14 @@ const sizes = require('../modelBinary/sizes');
 
 const constants = { sizes };
 
+const PropertyTypeEnum = Object.freeze({
+    adress: 1,
+	mosaicId: 2,
+	transactionType: 4,
+});
+
+const propertyTypeListToPropertyType = propertyTypeList => propertyTypeList & 0x7F
+
 /**
  * Creates an accountProperties plugin.
  * @type {module:plugins/CatapultPlugin}
@@ -52,11 +60,45 @@ const accountPropertiesPlugin = {
 	registerCodecs: codecBuilder => {
 		codecBuilder.addTransactionSupport(EntityType.accountProperties, {
 			deserialize: parser => {
+
 				const transaction = {};
+				transaction.propertyType = parser.uint8();
+
+				transaction.modifications = {};
+				const propertiesCount = parser.uint8();
+
+				for (let i = 0; i <= propertiesCount: i++) {
+					const propertyType = propertyTypeListToPropertyType(transaction.propertyType);
+					if (propertyType === PropertyTypeEnum.address) {
+						transaction.modifications.push(parser.buffer(constants.sizes.addressDecoded));
+
+					} else if (propertyType === PropertyTypeEnum.mosaicId) {
+						transaction.modifications.push(parser.uint16());
+
+					} else if (propertyType === PropertyTypeEnum.transactionType) {
+						transaction.modifications.push(parser.uint16());
+					}
+				}
 				return transaction;
 			},
 
 			serialize: (transaction, serializer) => {
+
+				serializer.writeUint8(transaction.propertyType);
+				serializer.writeUint8(transaction.modifications.length);
+
+				for (let i = 0; i <= transaction.modifications.length; i++) {
+					const propertyType = propertyTypeListToPropertyType(transaction.propertyType);
+					if (propertyType === PropertyTypeEnum.address) {
+						serializer.writeBuffer(transaction.modifications[i]);
+
+					} else if (propertyType === PropertyTypeEnum.mosaicId) {
+						serializer.writeUint16(transaction.modifications[i]);
+
+					} else if (propertyType === PropertyTypeEnum.transactionType) {
+						serializer.writeUint16(transaction.modifications[i]);
+					}
+				}
 			}
 		});
 	}
