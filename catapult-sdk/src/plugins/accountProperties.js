@@ -26,12 +26,12 @@ const sizes = require('../modelBinary/sizes');
 const constants = { sizes };
 
 const PropertyTypeEnum = Object.freeze({
-    address: 1,
+	address: 1,
 	mosaicId: 2,
-	transactionType: 4,
+	transactionType: 4
 });
 
-const propertyTypeListToPropertyType = propertyTypeList => propertyTypeList & 0x7F
+const propertyTypeListToPropertyType = propertyTypeList => propertyTypeList & 0x7F;
 
 /**
  * Creates an accountProperties plugin.
@@ -41,7 +41,7 @@ const accountPropertiesPlugin = {
 	registerSchema: builder => {
 		builder.addTransactionSupport(EntityType.accountProperties, {
 			propertyType: ModelType.uint64,
-			modifications: { type: ModelType.array, schemaName: 'accountProperties.modificationType'}
+			modifications: { type: ModelType.array, schemaName: 'accountProperties.modificationType' }
 		});
 		builder.addSchema('accountProperties.modificationType', {
 			modificationType: ModelType.uint64,
@@ -68,41 +68,33 @@ const accountPropertiesPlugin = {
 
 				for (let i = 0; i < propertiesCount; i++) {
 					const propertyType = propertyTypeListToPropertyType(transaction.propertyType);
-                    const modification = {};
-                    modification.modificationType = parser.uint8();
-					if (propertyType === PropertyTypeEnum.address) {
+					const modification = {};
+					modification.modificationType = parser.uint8();
+					if (propertyType === PropertyTypeEnum.address)
 						modification.value = parser.buffer(constants.sizes.addressDecoded);
-
-					} else if (propertyType === PropertyTypeEnum.mosaicId) {
+					else if (propertyType === PropertyTypeEnum.mosaicId)
 						modification.value = parser.uint16();
-
-					} else if (propertyType === PropertyTypeEnum.transactionType) {
+					else if (propertyType === PropertyTypeEnum.transactionType)
 						modification.value = parser.uint16();
-					}
-
-                    transaction.modifications.push(modification);
+					transaction.modifications.push(modification);
 				}
+
 				return transaction;
 			},
 
 			serialize: (transaction, serializer) => {
-
 				serializer.writeUint8(transaction.propertyType);
 				serializer.writeUint8(transaction.modifications.length);
 
 				for (let i = 0; i < transaction.modifications.length; i++) {
 					const propertyType = propertyTypeListToPropertyType(transaction.propertyType);
-                    serializer.writeUint8(transaction.modifications[i].modificationType);
-
-					if (propertyType === PropertyTypeEnum.address) {
+					serializer.writeUint8(transaction.modifications[i].modificationType);
+					if (propertyType === PropertyTypeEnum.address)
 						serializer.writeBuffer(transaction.modifications[i].value);
-
-					} else if (propertyType === PropertyTypeEnum.mosaicId) {
+					else if (propertyType === PropertyTypeEnum.mosaicId)
 						serializer.writeUint16(transaction.modifications[i].value);
-
-					} else if (propertyType === PropertyTypeEnum.transactionType) {
+					else if (propertyType === PropertyTypeEnum.transactionType)
 						serializer.writeUint16(transaction.modifications[i].value);
-					}
 				}
 			}
 		});
@@ -113,4 +105,4 @@ module.exports = {
 	accountPropertiesPlugin,
 	propertyTypeListToPropertyType,
 	PropertyTypeEnum
-}
+};

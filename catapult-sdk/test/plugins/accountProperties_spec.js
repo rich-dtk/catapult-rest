@@ -21,10 +21,9 @@
 const { expect } = require('chai');
 const EntityType = require('../../src/model/EntityType');
 const ModelSchemaBuilder = require('../../src/model/ModelSchemaBuilder');
-const ModelType = require('../../src/model/ModelType');
 const test = require('../binaryTestUtils');
 
-const { PropertyTypeEnum, propertyTypeListToPropertyType, accountPropertiesPlugin } =  require('../../src/plugins/accountProperties');
+const { PropertyTypeEnum, propertyTypeListToPropertyType, accountPropertiesPlugin } = require('../../src/plugins/accountProperties');
 
 describe('account properties plugin', () => {
 	describe('property types enum', () => {
@@ -62,7 +61,12 @@ describe('account properties plugin', () => {
 
 			// Assert:
 			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 4);
-			expect(modelSchema).to.contain.all.keys(['accountProperties', 'accountProperties.modificationType', 'accountProperties.accountProperties', 'accountProperties.accountProperty']);
+			expect(modelSchema).to.contain.all.keys([
+				'accountProperties',
+				'accountProperties.modificationType',
+				'accountProperties.accountProperties',
+				'accountProperties.accountProperty'
+			]);
 
 			// - accountProperties
 			expect(Object.keys(modelSchema.accountProperties).length).to.equal(Object.keys(modelSchema.transaction).length + 2);
@@ -83,7 +87,6 @@ describe('account properties plugin', () => {
 	});
 
 	describe('register codecs', () => {
-
 		const getCodecs = () => {
 			const codecs = {};
 			accountPropertiesPlugin.registerCodecs({
@@ -106,58 +109,54 @@ describe('account properties plugin', () => {
 
 		describe('supports account properties with no modifications', () => {
 			test.binary.test.addAll(getCodec(), 2, () => ({
-					buffer: Buffer.concat([
-						Buffer.of(PropertyTypeEnum.address), // property type
-						Buffer.of(0x00), // modifications count
-					]),
-					object: {
-						propertyType: PropertyTypeEnum.address,
-						modifications: []
-					}
-				})
-			);
+				buffer: Buffer.concat([
+					Buffer.of(PropertyTypeEnum.address), // property type
+					Buffer.of(0x00) // modifications count
+				]),
+				object: {
+					propertyType: PropertyTypeEnum.address,
+					modifications: []
+				}
+			}));
 			test.binary.test.addAll(getCodec(), 2, () => ({
-					buffer: Buffer.concat([
-						Buffer.of(PropertyTypeEnum.mosaicId), // property type
-						Buffer.of(0x00), // modifications count
-					]),
-					object: {
-						propertyType: PropertyTypeEnum.mosaicId,
-						modifications: []
-					}
-				})
-			);
+				buffer: Buffer.concat([
+					Buffer.of(PropertyTypeEnum.mosaicId), // property type
+					Buffer.of(0x00) // modifications count
+				]),
+				object: {
+					propertyType: PropertyTypeEnum.mosaicId,
+					modifications: []
+				}
+			}));
 			test.binary.test.addAll(getCodec(), 2, () => ({
-					buffer: Buffer.concat([
-						Buffer.of(PropertyTypeEnum.transactionType), // property type
-						Buffer.of(0x00), // modifications count
-					]),
-					object: {
-						propertyType: PropertyTypeEnum.transactionType,
-						modifications: []
-					}
-				})
-			);
+				buffer: Buffer.concat([
+					Buffer.of(PropertyTypeEnum.transactionType), // property type
+					Buffer.of(0x00)// modifications count
+				]),
+				object: {
+					propertyType: PropertyTypeEnum.transactionType,
+					modifications: []
+				}
+			}));
 		});
 
 		describe('supports account properties with modifications', () => {
 			const testAddress = test.random.bytes(test.constants.sizes.addressDecoded);
 			test.binary.test.addAll(getCodec(), 28, () => ({
-					buffer: Buffer.concat([
-						Buffer.of(PropertyTypeEnum.address), // property type
-						Buffer.of(0x01), // modifications count
-						Buffer.of(0x00), // modification type
-						Buffer.from(testAddress), // address
-					]),
-					object: {
-						propertyType: PropertyTypeEnum.address,
-						modifications: [{
-							modificationType: 0x00,
-							value: testAddress
-						}]
-					}
-				})
-			);
+				buffer: Buffer.concat([
+					Buffer.of(PropertyTypeEnum.address), // property type
+					Buffer.of(0x01), // modifications count
+					Buffer.of(0x00), // modification type
+					Buffer.from(testAddress) // address
+				]),
+				object: {
+					propertyType: PropertyTypeEnum.address,
+					modifications: [{
+						modificationType: 0x00,
+						value: testAddress
+					}]
+				}
+			}));
 		});
 	});
 });
