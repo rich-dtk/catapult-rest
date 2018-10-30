@@ -57,8 +57,15 @@ const EntityType = {
 	/** Secret proof transaction. */
 	secretProof: 0x434C,
 
-	/** Account properties transaction. */
-	accountProperties: 0x0000
+	/** Account properties address modification transaction. */
+	accountPropertiesAddress: 0x4150,
+
+	/** Account properties mosaic modification transaction. */
+	accountPropertiesMosaic: 0x4151,
+
+	/** Account properties entity type modification transaction. */
+	accountPropertiesEntityType: 0x4152
+
 };
 
 module.exports = EntityType;

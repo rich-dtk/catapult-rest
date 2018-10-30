@@ -36,7 +36,9 @@ describe('entity type enumeration', () => {
 			hashLock: 0x414C,
 			secretLock: 0x424C,
 			secretProof: 0x434C,
-			accountProperties: 0xFFFF
+			accountPropertiesAddress: 0x4150,
+			accountPropertiesMosaic: 0x4151,
+			accountPropertiesEntityType: 0x4152
 		});
 	});
 
