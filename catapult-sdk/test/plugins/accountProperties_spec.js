@@ -29,9 +29,9 @@ describe('account properties plugin', () => {
 	describe('property types enum', () => {
 		it('contains valid values', () => {
 			// Assert:
-			expect(PropertyTypeEnum.address).to.equal(1);
-			expect(PropertyTypeEnum.mosaic).to.equal(2);
-			expect(PropertyTypeEnum.entityType).to.equal(4);
+			expect(PropertyTypeEnum.addressAllow).to.equal(1);
+			expect(PropertyTypeEnum.mosaicAllow).to.equal(2);
+			expect(PropertyTypeEnum.entityTypeAllow).to.equal(4);
 		});
 	});
 
@@ -105,18 +105,18 @@ describe('account properties plugin', () => {
 			]);
 		});
 
-		const getCodecAddress = () => getCodecs()[EntityType.accountPropertiesAddress];
-		const getCodecMosaic = () => getCodecs()[EntityType.accountPropertiesMosaic];
-		const getCodecEntityType = () => getCodecs()[EntityType.accountPropertiesEntityType];
+		const codecAddress = getCodecs()[EntityType.accountPropertiesAddress];
+		const codecMosaic = getCodecs()[EntityType.accountPropertiesMosaic];
+		const codecEntityType = getCodecs()[EntityType.accountPropertiesEntityType];
 
 		describe('supports account properties address with no modifications', () => {
-			test.binary.test.addAll(getCodecAddress(), 2, () => ({
+			test.binary.test.addAll(codecAddress, 2, () => ({
 				buffer: Buffer.concat([
-					Buffer.of(PropertyTypeEnum.address), // property type
+					Buffer.of(PropertyTypeEnum.addressAllow), // property type
 					Buffer.of(0x00) // modifications count
 				]),
 				object: {
-					propertyType: PropertyTypeEnum.address,
+					propertyType: PropertyTypeEnum.addressAllow,
 					modifications: []
 				}
 			}));
@@ -124,15 +124,15 @@ describe('account properties plugin', () => {
 
 		describe('supports account properties address with modifications ', () => {
 			const testAddress = test.random.bytes(test.constants.sizes.addressDecoded);
-			test.binary.test.addAll(getCodecAddress(), 28, () => ({
+			test.binary.test.addAll(codecAddress, 28, () => ({
 				buffer: Buffer.concat([
-					Buffer.of(PropertyTypeEnum.address), // property type
+					Buffer.of(PropertyTypeEnum.addressAllow), // property type
 					Buffer.of(0x01), // modifications count
 					Buffer.of(0x00), // modification type
 					Buffer.from(testAddress) // address
 				]),
 				object: {
-					propertyType: PropertyTypeEnum.address,
+					propertyType: PropertyTypeEnum.addressAllow,
 					modifications: [{
 						modificationType: 0x00,
 						value: testAddress
@@ -142,28 +142,28 @@ describe('account properties plugin', () => {
 		});
 
 		describe('supports account properties mosaic with no modifications', () => {
-			test.binary.test.addAll(getCodecMosaic(), 2, () => ({
+			test.binary.test.addAll(codecMosaic, 2, () => ({
 				buffer: Buffer.concat([
-					Buffer.of(PropertyTypeEnum.mosaic), // property type
+					Buffer.of(PropertyTypeEnum.mosaicAllow), // property type
 					Buffer.of(0x00) // modifications count
 				]),
 				object: {
-					propertyType: PropertyTypeEnum.mosaic,
+					propertyType: PropertyTypeEnum.mosaicAllow,
 					modifications: []
 				}
 			}));
 		});
 
 		describe('supports account properties mosaic with modifications ', () => {
-			test.binary.test.addAll(getCodecMosaic(), 11, () => ({
+			test.binary.test.addAll(codecMosaic, 11, () => ({
 				buffer: Buffer.concat([
-					Buffer.of(PropertyTypeEnum.mosaic), // property type
+					Buffer.of(PropertyTypeEnum.mosaicAllow), // property type
 					Buffer.of(0x01), // modifications count
 					Buffer.of(0x00), // modification type
 					Buffer.of(0xF2, 0x26, 0x6C, 0x06, 0x40, 0x83, 0xB2, 0x92) // mosaicId
 				]),
 				object: {
-					propertyType: PropertyTypeEnum.mosaic,
+					propertyType: PropertyTypeEnum.mosaicAllow,
 					modifications: [{
 						modificationType: 0x00,
 						value: [0x066C26F2, 0x92B28340]
@@ -173,13 +173,13 @@ describe('account properties plugin', () => {
 		});
 
 		describe('supports account properties entityType with no modifications', () => {
-			test.binary.test.addAll(getCodecEntityType(), 2, () => ({
+			test.binary.test.addAll(codecEntityType, 2, () => ({
 				buffer: Buffer.concat([
-					Buffer.of(PropertyTypeEnum.entityType), // property type
+					Buffer.of(PropertyTypeEnum.entityTypeAllow), // property type
 					Buffer.of(0x00) // modifications count
 				]),
 				object: {
-					propertyType: PropertyTypeEnum.entityType,
+					propertyType: PropertyTypeEnum.entityTypeAllow,
 					modifications: []
 				}
 			}));
@@ -188,15 +188,15 @@ describe('account properties plugin', () => {
 		describe('supports account properties entityType with modifications ', () => {
 			const entityTypeId = test.random.bytes(2);
 
-			test.binary.test.addAll(getCodecEntityType(), 5, () => ({
+			test.binary.test.addAll(codecEntityType, 5, () => ({
 				buffer: Buffer.concat([
-					Buffer.of(PropertyTypeEnum.entityType), // property type
+					Buffer.of(PropertyTypeEnum.entityTypeAllow), // property type
 					Buffer.of(0x01), // modifications count
 					Buffer.of(0x00), // modification type
 					Buffer.from(entityTypeId) // mosaicId
 				]),
 				object: {
-					propertyType: PropertyTypeEnum.entityType,
+					propertyType: PropertyTypeEnum.entityTypeAllow,
 					modifications: [{
 						modificationType: 0x00,
 						value: entityTypeId.readUInt16LE()

@@ -25,10 +25,14 @@ const sizes = require('../modelBinary/sizes');
 
 const constants = { sizes };
 
+const propertyTypeEnumBlockOffset = 128;
 const PropertyTypeEnum = Object.freeze({
-	address: 1,
-	mosaic: 2,
-	entityType: 4
+	addressAllow: 1,
+	addressBlock: 1 + propertyTypeEnumBlockOffset,
+	mosaicAllow: 2,
+	mosaicBloc: 2 + propertyTypeEnumBlockOffset,
+	entityTypeAllow: 4,
+	entityTypeBlock: 4 + propertyTypeEnumBlockOffset
 });
 
 /**
