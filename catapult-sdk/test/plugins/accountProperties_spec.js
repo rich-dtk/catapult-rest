@@ -29,9 +29,13 @@ describe('account properties plugin', () => {
 	describe('property types enum', () => {
 		it('contains valid values', () => {
 			// Assert:
+			const propertyTypeEnumBlockOffset = 128;
 			expect(PropertyTypeEnum.addressAllow).to.equal(1);
+			expect(PropertyTypeEnum.addressBlock).to.equal(1 + propertyTypeEnumBlockOffset);
 			expect(PropertyTypeEnum.mosaicAllow).to.equal(2);
+			expect(PropertyTypeEnum.mosaicBlock).to.equal(2 + propertyTypeEnumBlockOffset);
 			expect(PropertyTypeEnum.entityTypeAllow).to.equal(4);
+			expect(PropertyTypeEnum.entityTypeBlock).to.equal(4 + propertyTypeEnumBlockOffset);
 		});
 	});
 
@@ -56,27 +60,27 @@ describe('account properties plugin', () => {
 				'accountProperties.accountProperty'
 			]);
 
-			// accountPropertiesAddress
+			// - accountPropertiesAddress
 			expect(Object.keys(modelSchema.accountPropertiesAddress).length).to.equal(Object.keys(modelSchema.transaction).length + 2);
 			expect(modelSchema.accountPropertiesAddress).to.contain.all.keys(['propertyType', 'modifications']);
 
-			// accountPropertiesMosaic
+			// - accountPropertiesMosaic
 			expect(Object.keys(modelSchema.accountPropertiesMosaic).length).to.equal(Object.keys(modelSchema.transaction).length + 2);
 			expect(modelSchema.accountPropertiesMosaic).to.contain.all.keys(['propertyType', 'modifications']);
 
-			// accountPropertiesEntityType
+			// - accountPropertiesEntityType
 			expect(Object.keys(modelSchema.accountPropertiesEntityType).length).to.equal(Object.keys(modelSchema.transaction).length + 2);
 			expect(modelSchema.accountPropertiesEntityType).to.contain.all.keys(['propertyType', 'modifications']);
 
-			// accountProperties.modificationType
+			// - accountProperties.modificationType
 			expect(Object.keys(modelSchema['accountProperties.modificationType']).length).to.equal(2);
 			expect(modelSchema['accountProperties.modificationType']).to.contain.all.keys(['modificationType', 'value']);
 
-			// accountProperties.accountProperties
+			// - accountProperties.accountProperties
 			expect(Object.keys(modelSchema['accountProperties.accountProperties']).length).to.equal(2);
 			expect(modelSchema['accountProperties.accountProperties']).to.contain.all.keys(['address', 'properties']);
 
-			// accountProperties.accountProperty
+			// - accountProperties.accountProperty
 			expect(Object.keys(modelSchema['accountProperties.accountProperty']).length).to.equal(2);
 			expect(modelSchema['accountProperties.accountProperty']).to.contain.all.keys(['propertyType', 'values']);
 		});
@@ -123,19 +127,26 @@ describe('account properties plugin', () => {
 		});
 
 		describe('supports account properties address with modifications ', () => {
-			const testAddress = test.random.bytes(test.constants.sizes.addressDecoded);
-			test.binary.test.addAll(codecAddress, 28, () => ({
+			const testAddress1 = test.random.bytes(test.constants.sizes.addressDecoded);
+			const testAddress2 = test.random.bytes(test.constants.sizes.addressDecoded);
+			test.binary.test.addAll(codecAddress, 54, () => ({
 				buffer: Buffer.concat([
 					Buffer.of(PropertyTypeEnum.addressAllow), // property type
-					Buffer.of(0x01), // modifications count
-					Buffer.of(0x00), // modification type
-					Buffer.from(testAddress) // address
+					Buffer.of(0x02), // modifications count
+					Buffer.of(0x00), // 1st modification type
+					Buffer.from(testAddress1), // 1st address
+					Buffer.of(0x01), // 2nd modification type
+					Buffer.from(testAddress2) // 2nd address
 				]),
 				object: {
 					propertyType: PropertyTypeEnum.addressAllow,
 					modifications: [{
 						modificationType: 0x00,
-						value: testAddress
+						value: testAddress1
+					},
+					{
+						modificationType: 0x01,
+						value: testAddress2
 					}]
 				}
 			}));
@@ -154,19 +165,25 @@ describe('account properties plugin', () => {
 			}));
 		});
 
-		describe('supports account properties mosaic with modifications ', () => {
-			test.binary.test.addAll(codecMosaic, 11, () => ({
+		describe('supports account properties mosaic with modifications', () => {
+			test.binary.test.addAll(codecMosaic, 20, () => ({
 				buffer: Buffer.concat([
 					Buffer.of(PropertyTypeEnum.mosaicAllow), // property type
-					Buffer.of(0x01), // modifications count
-					Buffer.of(0x00), // modification type
-					Buffer.of(0xF2, 0x26, 0x6C, 0x06, 0x40, 0x83, 0xB2, 0x92) // mosaicId
+					Buffer.of(0x02), // modifications count
+					Buffer.of(0x00), // 1st modification type
+					Buffer.of(0xF2, 0x26, 0x6C, 0x06, 0x40, 0x83, 0xB2, 0x92), // 1st mosaicId
+					Buffer.of(0x01), // 2nd modification type
+					Buffer.of(0xD1, 0x15, 0x5B, 0xF5, 0x3F, 0x72, 0xA1, 0x81) // 2nd mosaicId
 				]),
 				object: {
 					propertyType: PropertyTypeEnum.mosaicAllow,
 					modifications: [{
 						modificationType: 0x00,
 						value: [0x066C26F2, 0x92B28340]
+					},
+					{
+						modificationType: 0x01,
+						value: [0xF55B15D1, 0x81A1723F]
 					}]
 				}
 			}));
@@ -186,20 +203,24 @@ describe('account properties plugin', () => {
 		});
 
 		describe('supports account properties entityType with modifications ', () => {
-			const entityTypeId = test.random.bytes(2);
-
-			test.binary.test.addAll(codecEntityType, 5, () => ({
+			test.binary.test.addAll(codecEntityType, 8, () => ({
 				buffer: Buffer.concat([
 					Buffer.of(PropertyTypeEnum.entityTypeAllow), // property type
-					Buffer.of(0x01), // modifications count
-					Buffer.of(0x00), // modification type
-					Buffer.from(entityTypeId) // mosaicId
+					Buffer.of(0x02), // modifications count
+					Buffer.of(0x00), // 1st modification type
+					Buffer.of(0xF2, 0x83), // 1st entityType
+					Buffer.of(0x01), // 2nd modification type
+					Buffer.of(0xE1, 0x72) // 2nd entityType
 				]),
 				object: {
 					propertyType: PropertyTypeEnum.entityTypeAllow,
 					modifications: [{
 						modificationType: 0x00,
-						value: entityTypeId.readUInt16LE()
+						value: 0x83F2
+					},
+					{
+						modificationType: 0x01,
+						value: 0x72E1
 					}]
 				}
 			}));

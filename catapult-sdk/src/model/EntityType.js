@@ -65,7 +65,6 @@ const EntityType = {
 
 	/** Account properties entity type modification transaction. */
 	accountPropertiesEntityType: 0x4152
-
 };
 
 module.exports = EntityType;

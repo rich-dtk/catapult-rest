@@ -30,7 +30,7 @@ const PropertyTypeEnum = Object.freeze({
 	addressAllow: 1,
 	addressBlock: 1 + propertyTypeEnumBlockOffset,
 	mosaicAllow: 2,
-	mosaicBloc: 2 + propertyTypeEnumBlockOffset,
+	mosaicBlock: 2 + propertyTypeEnumBlockOffset,
 	entityTypeAllow: 4,
 	entityTypeBlock: 4 + propertyTypeEnumBlockOffset
 });
