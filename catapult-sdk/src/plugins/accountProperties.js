@@ -35,6 +35,40 @@ const PropertyTypeEnum = Object.freeze({
 	entityTypeBlock: 4 + propertyTypeEnumBlockOffset
 });
 
+const accountPropertiesCreateBaseCodec = transactionType => ({
+	deserialize: parser => {
+		const transaction = {};
+		transaction.propertyType = parser.uint8();
+		transaction.modifications = [];
+		const propertiesCount = parser.uint8();
+		for (let i = 0; i < propertiesCount; i++) {
+			const modification = {};
+			modification.modificationType = parser.uint8();
+			if (transactionType === EntityType.accountPropertiesAddress)
+				modification.value = parser.buffer(constants.sizes.addressDecoded);
+			else if (transactionType === EntityType.accountPropertiesMosaic)
+				modification.value = parser.uint64();
+			else if (transactionType === EntityType.accountPropertiesEntityType)
+				modification.value = parser.uint16();
+			transaction.modifications.push(modification);
+		}
+		return transaction;
+	},
+	serialize: (transaction, serializer) => {
+		serializer.writeUint8(transaction.propertyType);
+		serializer.writeUint8(transaction.modifications.length);
+		for (let i = 0; i < transaction.modifications.length; i++) {
+			serializer.writeUint8(transaction.modifications[i].modificationType);
+			if (transactionType === EntityType.accountPropertiesAddress)
+				serializer.writeBuffer(transaction.modifications[i].value);
+			else if (transactionType === EntityType.accountPropertiesMosaic)
+				serializer.writeUint64(transaction.modifications[i].value);
+			else if (transactionType === EntityType.accountPropertiesEntityType)
+				serializer.writeUint16(transaction.modifications[i].value);
+		}
+	}
+});
+
 /**
  * Creates an accountProperties plugin.
  * @type {module:plugins/CatapultPlugin}
@@ -69,81 +103,25 @@ const accountPropertiesPlugin = {
 	},
 
 	registerCodecs: codecBuilder => {
-		codecBuilder.addTransactionSupport(EntityType.accountPropertiesAddress, {
-			deserialize: parser => {
-				const transaction = {};
-				transaction.propertyType = parser.uint8();
-				transaction.modifications = [];
-				const propertiesCount = parser.uint8();
-				for (let i = 0; i < propertiesCount; i++) {
-					const modification = {};
-					modification.modificationType = parser.uint8();
-					modification.value = parser.buffer(constants.sizes.addressDecoded);
-					transaction.modifications.push(modification);
-				}
-				return transaction;
-			},
-			serialize: (transaction, serializer) => {
-				serializer.writeUint8(transaction.propertyType);
-				serializer.writeUint8(transaction.modifications.length);
-				for (let i = 0; i < transaction.modifications.length; i++) {
-					serializer.writeUint8(transaction.modifications[i].modificationType);
-					serializer.writeBuffer(transaction.modifications[i].value);
-				}
-			}
-		});
+		codecBuilder.addTransactionSupport(
+			EntityType.accountPropertiesAddress,
+			accountPropertiesCreateBaseCodec(EntityType.accountPropertiesAddress)
+		);
 
-		codecBuilder.addTransactionSupport(EntityType.accountPropertiesMosaic, {
-			deserialize: parser => {
-				const transaction = {};
-				transaction.propertyType = parser.uint8();
-				transaction.modifications = [];
-				const propertiesCount = parser.uint8();
-				for (let i = 0; i < propertiesCount; i++) {
-					const modification = {};
-					modification.modificationType = parser.uint8();
-					modification.value = parser.uint64();
-					transaction.modifications.push(modification);
-				}
-				return transaction;
-			},
-			serialize: (transaction, serializer) => {
-				serializer.writeUint8(transaction.propertyType);
-				serializer.writeUint8(transaction.modifications.length);
-				for (let i = 0; i < transaction.modifications.length; i++) {
-					serializer.writeUint8(transaction.modifications[i].modificationType);
-					serializer.writeUint64(transaction.modifications[i].value);
-				}
-			}
-		});
+		codecBuilder.addTransactionSupport(
+			EntityType.accountPropertiesMosaic,
+			accountPropertiesCreateBaseCodec(EntityType.accountPropertiesMosaic)
+		);
 
-		codecBuilder.addTransactionSupport(EntityType.accountPropertiesEntityType, {
-			deserialize: parser => {
-				const transaction = {};
-				transaction.propertyType = parser.uint8();
-				transaction.modifications = [];
-				const propertiesCount = parser.uint8();
-				for (let i = 0; i < propertiesCount; i++) {
-					const modification = {};
-					modification.modificationType = parser.uint8();
-					modification.value = parser.uint16();
-					transaction.modifications.push(modification);
-				}
-				return transaction;
-			},
-			serialize: (transaction, serializer) => {
-				serializer.writeUint8(transaction.propertyType);
-				serializer.writeUint8(transaction.modifications.length);
-				for (let i = 0; i < transaction.modifications.length; i++) {
-					serializer.writeUint8(transaction.modifications[i].modificationType);
-					serializer.writeUint16(transaction.modifications[i].value);
-				}
-			}
-		});
+		codecBuilder.addTransactionSupport(
+			EntityType.accountPropertiesEntityType,
+			accountPropertiesCreateBaseCodec(EntityType.accountPropertiesEntityType)
+		);
 	}
 };
 
 module.exports = {
 	accountPropertiesPlugin,
+	accountPropertiesCreateBaseCodec,
 	PropertyTypeEnum
 };

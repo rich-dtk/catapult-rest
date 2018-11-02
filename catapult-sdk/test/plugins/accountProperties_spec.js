@@ -23,7 +23,7 @@ const EntityType = require('../../src/model/EntityType');
 const ModelSchemaBuilder = require('../../src/model/ModelSchemaBuilder');
 const test = require('../binaryTestUtils');
 
-const { PropertyTypeEnum, accountPropertiesPlugin } = require('../../src/plugins/accountProperties');
+const { accountPropertiesPlugin, accountPropertiesCreateBaseCodec, PropertyTypeEnum } = require('../../src/plugins/accountProperties');
 
 describe('account properties plugin', () => {
 	describe('property types enum', () => {
@@ -36,6 +36,22 @@ describe('account properties plugin', () => {
 			expect(PropertyTypeEnum.mosaicBlock).to.equal(2 + propertyTypeEnumBlockOffset);
 			expect(PropertyTypeEnum.entityTypeAllow).to.equal(4);
 			expect(PropertyTypeEnum.entityTypeBlock).to.equal(4 + propertyTypeEnumBlockOffset);
+		});
+	});
+
+	describe('account properties create base codec', () => {
+		it('creates a correct base codec for every transaction type', () => {
+			// Arrange:
+			const baseCodecForAdress = accountPropertiesCreateBaseCodec(EntityType.accountPropertiesAddress);
+			const baseCodecForMosaic = accountPropertiesCreateBaseCodec(EntityType.accountPropertiesMosaic);
+			const baseCodecForEntityType = accountPropertiesCreateBaseCodec(EntityType.accountPropertiesEntityType);
+			// Act:
+			expect(Object.keys(baseCodecForAdress).length).to.equal(2);
+			expect(baseCodecForAdress).to.contain.all.keys(['deserialize', 'serialize']);
+			expect(Object.keys(baseCodecForMosaic).length).to.equal(2);
+			expect(baseCodecForMosaic).to.contain.all.keys(['deserialize', 'serialize']);
+			expect(Object.keys(baseCodecForEntityType).length).to.equal(2);
+			expect(baseCodecForEntityType).to.contain.all.keys(['deserialize', 'serialize']);
 		});
 	});
 
@@ -126,7 +142,7 @@ describe('account properties plugin', () => {
 			}));
 		});
 
-		describe('supports account properties address with modifications ', () => {
+		describe('supports account properties address with modifications', () => {
 			const testAddress1 = test.random.bytes(test.constants.sizes.addressDecoded);
 			const testAddress2 = test.random.bytes(test.constants.sizes.addressDecoded);
 			test.binary.test.addAll(codecAddress, 54, () => ({
@@ -202,7 +218,7 @@ describe('account properties plugin', () => {
 			}));
 		});
 
-		describe('supports account properties entityType with modifications ', () => {
+		describe('supports account properties entityType with modifications', () => {
 			test.binary.test.addAll(codecEntityType, 8, () => ({
 				buffer: Buffer.concat([
 					Buffer.of(PropertyTypeEnum.entityTypeAllow), // property type
